@@ -1,4 +1,4 @@
-This is a simple proof that Hitler's wikipedia page can or cannot be reached in 6 clicks on references to other wiki aritcles from any wiki article.
+This is a simple proof that Hitler's wikipedia page can or cannot be reached in 5 clicks on references to other wiki aritcles from any wiki article.
 The only problem is it would take years to complete.
 In the future I'll somehow parse Wikipedia and make a dictionary or a database to contain all the articles a certain article was referenced from,
 which should speed up the process 10000-fold.
