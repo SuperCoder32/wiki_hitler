@@ -3,7 +3,13 @@ import requests
 DOMAIN = 'https://en.wikipedia.org/w/api.php'
 HEADERS = {'User-Agent': 'wiki_hitler_BOT/0.0 (https://github.com/SuperCoder32/wiki_hitler; pietarcho@gmail.com)'}
 
-def query(req):
+class Placeholder:
+    pass
+
+def query(req, cont=False):
+    if cont:
+        req['lhcontinue'] = Placeholder() 
+
     req['action'] = 'query'
     req['format'] = 'json'
     req['prop'] = 'linkshere'
@@ -19,10 +25,15 @@ def parse_res(res):
     pageid = next(iter(res))
     res = res[pageid]['linkshere']
     res = [obj['title'] for obj in res]
+    return set(res)
 
-def main(title):
-    res = parse_res(query({'titles': title}))
-
+def main(title, times):
+    args = {'titles': title}
+    res = parse_res(query(args))
+    
+    for x in range(int(times)):
+        res.update(parse_res(query(args, cont=True)))
+    
     print(res)
 
 if __name__ == '__main__':
