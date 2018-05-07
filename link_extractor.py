@@ -10,7 +10,7 @@ NEXT_LINK_SELECT_STR = "#{} > a".format(CONTENT_ID)
 
 SPECIAL_PREFIX = "Special:WhatLinksHere"
 
-START_LINK_FORMAT = "/w/index.php?title=Special%3AWhatLinksHere&target={title}&namespace=0"
+START_LINK_FORMAT = "/w/index.php?title=Special%3AWhatLinksHere&target={title}&namespace=0&limit=500"
 
 #BEFORE = "/w/index.php?title=Special:WhatLinksHere/Gap,_Hautes-Alpes&from=537646&back=105054"
 #AFTER =  "/w/index.php?title=Special%3AWhatLinksHere&target=Gap%2C+Hautes-Alpes&namespace=0"

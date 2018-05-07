@@ -1,17 +1,7 @@
 import requests
 
-FORMAT = 'json'
 DOMAIN = 'https://en.wikipedia.org/w/api.php'
-HEADERS = {'User-Agent': 'FindHitlerBot/0.0 (pietarcho@gmail.com)'}
-
-def query(req):
-    req['action'] = 'query'
-    req['format'] = 'json'
-    req['list'] = 'embeddedin'
-    req['eilimit'] = '5000'
-
-    return requests.get(DOMAIN, params=req, headers=HEADERS).json()
-
+HEADERS = {'User-Agent': 'wiki_hitler_BOT/0.0 (https://github.com/SuperCoder32/wiki_hitler; pietarcho@gmail.com)'}
 
 USERNAME = 'FindHitlerBot'
 PASSWORD = 'SuccerY!'
@@ -27,7 +17,7 @@ def login():
     req['action'] = 'query'
     req['meta'] = 'tokens'
     req['type'] = 'login'
-    req['format'] = FORMAT
+    req['format'] = 'json'
     
     res = requests.post(DOMAIN, params=req, data=data, headers=HEADERS).json()
     token = res['query']['tokens']['logintoken']
