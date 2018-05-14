@@ -1,4 +1,7 @@
 import sys
+import os
+import shelve
+import argparse
 from link_extractor_final import get_all_articles
 
 
@@ -7,6 +10,11 @@ def get_neighbours(title):
 
 
 parent_of = dict()
+toVisit = list()
+visited = set()
+steps = int()
+proven = bool()
+
 
 def backtrack(node):
     degree = 0
@@ -23,55 +31,123 @@ def backtrack(node):
     return degree
 
 
-def main(root_article, verbose):
+def save_data(root_article):
+    with shelve.open(root_article + "-graph") as db:
+        db["tree"] = parent_of
+        db["toVisit"] = toVisit
+        db["visited"] = visited
+        db["steps"] = steps
+        db["proven"] = proven
+
+
+def load_data(root_article):
+    with shelve.open(root_article + "-graph") as db:
+        return {
+            "tree": db["tree"],
+            "toVisit": db["toVisit"],
+            "visited": db["visited"],
+            "steps": db["steps"],
+            "proven": db["proven"]
+        }
+
+
+def main(root_article, max_degree, verbose, save, load):
     global parent_of
-    parent_of = dict()
+    global toVisit, visited
+    global proven, steps
 
-    toVisit = [root_article]
-    parent_of[root_article] = None
+    if load and os.path.exists(root_article + "-graph.db"):
+        data = load_data(root_article)
 
-    visited = set()
-    proven = True
-    steps = 0
+        parent_of = data["tree"]
+        toVisit = data["toVisit"]
+        visited = data["visited"]
+        steps = data["steps"]
+        proven = data["proven"]
+    else:
+        parent_of = dict()
 
-    while len(toVisit) > 0 and proven:
-        node = toVisit.pop() 
+        toVisit = [root_article]
+        parent_of[root_article] = None
 
-        if verbose:
-            print("Added neighbours of", steps, "articles", end='; ')
-            print("A total of", len(visited), "articles are visited", end='; ')
-            print("There are", len(toVisit), "articles to add their neighbours in queue")
+        visited = set([root_article])
+        proven = True
+        steps = 0
+
+    try:
+        while len(toVisit) > 0 and proven:
+            node = toVisit.pop() 
+
+            if verbose:
+                print("Added neighbours of", steps, "articles")
+                print("A total of", len(visited), "articles are covered")
+                print("There are", len(toVisit), "articles in queue")
+                
+            degree = backtrack(node)
+            neighbours = get_neighbours(node)
+
+            visited_len_before = len(visited)
+
+            for link in neighbours:
+                if link in visited:
+                    continue
+
+                toVisit.insert(0, link)
+                parent_of[link] = node
+                visited.add(link)
             
-        degree = backtrack(node)
-        neighbours = get_neighbours(node)
+            visited_len_after = len(visited)
 
-        if degree == 6 - 1 and len(neighbours) > 0:
-            proven = False
-            break
+            if degree == max_degree and visited_len_after - visited_len_before > 0:
+                proven = False
+                break
+            
+            steps += 1
 
-        for link in neighbours:
-            if link in visited:
-                continue
+    except KeyboardInterrupt as exc:
+        print(exc)
+        if save:
+            print("Saving...")
+            save_data(root_article)
+            exit(0)
+    else:
+        if save:
+            print("Saving...")
+            save_data(root_article)
 
-            toVisit.insert(0, link)
-            parent_of[link] = node
-            visited.add(link)
-        
-        steps += 1
 
-
-    success = "{} is reachable in {} clicks from any wiki article".format(root_article, degree)
-    failure = "{} cannot be reached in 6 clicks or less from any wiki article".format(root_article)
+    success = "{num} wiki articles have at most degree {deg} to {ra}".format(ra=root_article, num=len(visited), deg=degree)
+    failure = "There are wiki articles with a larger degree than {md} to {ra}".format(ra=root_article, md=max_degree)
 
     print(success if proven else failure)
 
 
-if __name__ == "__main__":
-        root_article = sys.argv[1]
 
-        try:
-            verbose = sys.argv[2] == '-v'
-        except IndexError:
-            verbose = False            
+def parse_args():
+    parser = argparse.ArgumentParser(prog='proof_final', description='Find about the max degree to a wiki article.',
+        usage='proof_final -ra arg1 -md arg2 [-v] [-s] [-l]')
 
-        main(root_article, verbose)
+    parser.add_argument('-ra', help='Root Article - where to start')
+    parser.add_argument('-md', help='Maximum Degree - The maximum degree to the Root Article allowed(terminates after it exceeds it)', type=int)
+    parser.add_argument('-v', help='Verbosity - whether to log extensive info about progress (Default value is True)', default=True)
+    parser.add_argument('-s', help='Save - whether to save progress after termination (Default value is True)', default=True)
+    parser.add_argument('-l', help='Load - whether to load progress on specified Root Article', default=True)
+
+    args = vars(parser.parse_args())
+
+    if args['ra'] is None or args['md'] is None:
+        parser.print_help()
+        exit(0)
+
+    ra = args['ra']
+    md = args['md']
+    verbose = 'v' in args
+    save = 's' in args
+    load = 'l' in args
+
+    return ra, md, verbose, save, load
+
+
+if __name__ == "__main__":    
+    args = parse_args()
+    main(*args)
