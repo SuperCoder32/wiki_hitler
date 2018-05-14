@@ -64,6 +64,8 @@ def main(root_article, max_degree, verbose, save, load):
         visited = data["visited"]
         steps = data["steps"]
         proven = data["proven"]
+
+        del data
     else:
         parent_of = dict()
 
