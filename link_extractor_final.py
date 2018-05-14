@@ -1,7 +1,7 @@
 import requests
 
 DOMAIN = 'https://en.wikipedia.org/w/api.php'
-HEADERS = {'User-Agent': 'wiki_hitler_BOT/0.0 (https://github.com/SuperCoder32/wiki_hitler; pietarcho@gmail.com)'}
+HEADERS = {'User-Agent': 'wiki-degrees-BOT/0.0 (https://github.com/SuperCoder32/wiki_hitler; pietarcho@gmail.com)'}
 
 
 def query(req):
