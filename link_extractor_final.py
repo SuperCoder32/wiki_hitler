@@ -1,7 +1,7 @@
 import requests
 
 DOMAIN = 'https://en.wikipedia.org/w/api.php'
-HEADERS = {'User-Agent': 'wiki-degrees-BOT/0.0 (https://github.com/SuperCoder32/wiki_hitler; pietarcho@gmail.com)'}
+HEADERS = {'User-Agent': 'wiki-degrees-BOT/0.0 (https://github.com/SuperCoder32/wiki_hitler; pgpetrov2001@gmail.com)'}
 
 
 def query(req):
@@ -33,7 +33,7 @@ def parse_response(res):
 
 
 def get_all_articles(title):
-    title = title.replace(' ', '+')
+    title = title.replace(' ', '_')
     request = dict()
 
     request['titles'] = title

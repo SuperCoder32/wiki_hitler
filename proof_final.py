@@ -14,7 +14,7 @@ toVisit = list()
 visited = set()
 steps = int()
 proven = bool()
-
+degree = 0
 
 def backtrack(node):
     degree = 0
@@ -38,6 +38,7 @@ def save_data(root_article):
         db["visited"] = visited
         db["steps"] = steps
         db["proven"] = proven
+        db["degree"] = degree
 
 
 def load_data(root_article):
@@ -47,14 +48,15 @@ def load_data(root_article):
             "toVisit": db["toVisit"],
             "visited": db["visited"],
             "steps": db["steps"],
-            "proven": db["proven"]
+            "proven": db["proven"],
+            "degree": db["degree"]
         }
 
 
 def main(root_article, max_degree, verbose, save, load):
     global parent_of
     global toVisit, visited
-    global proven, steps
+    global proven, steps, degree
 
     if load and os.path.exists(root_article + "-graph.db"):
         data = load_data(root_article)
@@ -64,6 +66,7 @@ def main(root_article, max_degree, verbose, save, load):
         visited = data["visited"]
         steps = data["steps"]
         proven = data["proven"]
+        degree = data["degree"]
 
         del data
     else:
@@ -77,8 +80,8 @@ def main(root_article, max_degree, verbose, save, load):
         steps = 0
 
     try:
-        while len(toVisit) > 0 and proven:
-            node = toVisit.pop() 
+        while len(toVisit) > 0:
+            node = toVisit.pop(0) 
 
             if verbose:
                 print("Added neighbours of", steps, "articles")
@@ -94,7 +97,7 @@ def main(root_article, max_degree, verbose, save, load):
                 if link in visited:
                     continue
 
-                toVisit.insert(0, link)
+                toVisit.append(link)
                 parent_of[link] = node
                 visited.add(link)
             
@@ -130,26 +133,21 @@ def parse_args():
         usage='proof_final -ra arg1 -md arg2 [-v] [-s] [-l]')
 
     parser.add_argument('-ra', help='Root Article - where to start')
-    parser.add_argument('-md', help='Maximum Degree - The maximum degree to the Root Article allowed(terminates after it exceeds it)', type=int)
-    parser.add_argument('-v', help='Verbosity - whether to log extensive info about progress (Default value is True)', default=True)
-    parser.add_argument('-s', help='Save - whether to save progress after termination (Default value is True)', default=True)
-    parser.add_argument('-l', help='Load - whether to load progress on specified Root Article', default=True)
+    parser.add_argument('-md', help='Maximum Degree - The maximum degree to the Root Article allowed(terminates after it exceeds it)')
+    parser.add_argument('-v', help='Verbosity - whether to log extensive info about progress', dest='verbose', action='store_true')
+    parser.add_argument('-s', help='Save - whether to save progress after termination', dest='save', action='store_true')
+    parser.add_argument('-l', help='Load - whether to load progress on specified Root Article', dest='load', action='store_true')
 
-    args = vars(parser.parse_args())
+    args = parser.parse_args()
 
-    if args['ra'] is None or args['md'] is None:
+    if args.ra is None or args.md is None:
         parser.print_help()
         exit(0)
 
-    ra = args['ra']
-    md = args['md']
-    verbose = 'v' in args
-    save = 's' in args
-    load = 'l' in args
-
-    return ra, md, verbose, save, load
+    return args.ra, args.md, args.verbose, args.save, args.load
 
 
 if __name__ == "__main__":    
     args = parse_args()
+    print(args)
     main(*args)
